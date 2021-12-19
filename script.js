@@ -88,7 +88,6 @@ function initialize()
 
 function startGame()
 {
-    // INITIALIZE PLAYER OBJECT
     mrCaution = new Player('caution');
     msAggressive = new Player('aggressive');
     mrClueless= new Player('clueless');
@@ -119,7 +118,6 @@ function startGame()
 function addCardToBoard(person)
 {
     var player = BOARD.querySelector('#'+person.id);
-    console.log(person.id)
     person.hand.forEach(card => {
         var elem = document.createElement('img');
         if(person.id == 'you')
