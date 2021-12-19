@@ -153,16 +153,6 @@ function displayPile()
     image2.src = 'cards/' + deck[0].name;
     deckP.appendChild(image2);
 
-    var player = BOARD.querySelector('#'+person.id);
-    person.hand.forEach(card => {
-        var elem = document.createElement('img');
-        if(person.id == 'you')
-            elem.src = 'cards/' + card.name;
-        else
-            elem.src = 'card_back.png'
-        player.appendChild(elem);
-    });
-
 }
 
 function startRound()
