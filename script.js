@@ -86,14 +86,9 @@ function startGame()
 
 function addCardToHand(person, arr)
 {
-<<<<<<< Updated upstream
-    player = BOARD.getElementsByTagName('div')[person];
-    arr.forEach(card => {
-=======
     var player = BOARD.querySelector('#'+person.id);
     console.log(person.id)
     person.hand.forEach(card => {
->>>>>>> Stashed changes
         var elem = document.createElement('img');
         if(person == 'player')
             elem.src = 'cards/' + card.name;
