@@ -96,6 +96,15 @@ function initialize()
 
 function startGame()
 {
+
+    mrCaution = new Player('caution');
+    msAggressive = new Player('aggressive');
+    mrClueless= new Player('clueless');
+    you = new Player('you');
+    discard = [deck[0]];
+    deck.shift();
+
+
     // HAND OUT CARDS TO PLAYER
     for(var i = 0; i < 3; i++)
     {
@@ -116,6 +125,7 @@ function startGame()
 
 function displayAllHand()
 {
+
     var people = [mrCaution, msAggressive, mrClueless, you];
     for(var i = 0; i < people.length; i++)
     {
@@ -142,6 +152,17 @@ function displayPile()
     discP.appendChild(image1);
     image2.src = 'cards/' + deck[0].name;
     deckP.appendChild(image2);
+
+    var player = BOARD.querySelector('#'+person.id);
+    person.hand.forEach(card => {
+        var elem = document.createElement('img');
+        if(person.id == 'you')
+            elem.src = 'cards/' + card.name;
+        else
+            elem.src = 'card_back.png'
+        player.appendChild(elem);
+    });
+
 }
 
 function startRound()
