@@ -6,6 +6,11 @@ html
 {
   background: linear-gradient(#ffd89b, #19547b);
 } */
+img
+{
+  height: 100px;
+  border-radius: 3px;
+}
 
 #board
 {
@@ -18,8 +23,9 @@ html
   border: 1px solid black;
 }
 
-img
+#pile
 {
-  height: 100px;
-  border-radius: 3px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
 }
