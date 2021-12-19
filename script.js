@@ -48,14 +48,23 @@ function initialize()
 
 function startGame()
 {
+<<<<<<< Updated upstream
     // GIVES EVERYONE THEIR HAND
     mrCaution = [];
     msAggressive = [];
     mrClueless= [];
     player = [];
+=======
+    // INITIALIZE PLAYER OBJECT
+    mrCaution = new Player('caution');
+    msAggressive = new Player('aggressive');
+    mrClueless= new Player('clueless');
+    you = new Player('you');
+>>>>>>> Stashed changes
     discard = [deck[0]];
     deck.shift();
 
+    // HAND OUT CARDS TO PLAYER
     for(var i = 0; i < 3; i++)
     {
         mrCaution.push(deck[0]);
@@ -77,8 +86,14 @@ function startGame()
 
 function addCardToHand(person, arr)
 {
+<<<<<<< Updated upstream
     player = BOARD.getElementsByTagName('div')[person];
     arr.forEach(card => {
+=======
+    var player = BOARD.querySelector('#'+person.id);
+    console.log(person.id)
+    person.hand.forEach(card => {
+>>>>>>> Stashed changes
         var elem = document.createElement('img');
         if(person == 'player')
             elem.src = 'cards/' + card.name;
