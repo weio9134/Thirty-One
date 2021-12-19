@@ -88,7 +88,6 @@ function initialize()
 
 function startGame()
 {
-    // GIVES EVERYONE THEIR HAND
     mrCaution = new Player('caution');
     msAggressive = new Player('aggressive');
     mrClueless= new Player('clueless');
@@ -96,6 +95,7 @@ function startGame()
     discard = [deck[0]];
     deck.shift();
 
+    // HAND OUT CARDS TO PLAYER
     for(var i = 0; i < 3; i++)
     {
         mrCaution.addCard = deck[0];
