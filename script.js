@@ -33,6 +33,46 @@ class Card
     }
 }
 
+class Player
+{
+    constructor(id)
+    {
+        this.ID = id;
+        this.Hand = [];
+    }
+    /**
+     * @param {Card} card
+     */
+    set addCard(card)
+    {
+        this.Hand.push(card);
+    }
+    /**
+     * @param {int} index
+     */
+    set removeCard(index)
+    {
+        var temp = this.Hand[index];
+        this.Hand.splice(index, 1);
+        return temp;
+    }
+    get id()
+    {
+        return this.ID;
+    }
+    get hand()
+    {
+        return this.Hand;
+    }
+    get value()
+    {
+        var sum = 0;
+        for(var i = 0; i < this.Hand.length; i++)
+            sum += this.Hand[i].value;
+        return sum;
+    }
+}
+
 const BOARD = document.getElementById('board');
 
 function initialize()
@@ -48,49 +88,41 @@ function initialize()
 
 function startGame()
 {
-<<<<<<< Updated upstream
-    // GIVES EVERYONE THEIR HAND
-    mrCaution = [];
-    msAggressive = [];
-    mrClueless= [];
-    player = [];
-=======
     // INITIALIZE PLAYER OBJECT
     mrCaution = new Player('caution');
     msAggressive = new Player('aggressive');
     mrClueless= new Player('clueless');
     you = new Player('you');
->>>>>>> Stashed changes
     discard = [deck[0]];
     deck.shift();
 
     // HAND OUT CARDS TO PLAYER
     for(var i = 0; i < 3; i++)
     {
-        mrCaution.push(deck[0]);
+        mrCaution.addCard = deck[0];
         deck.shift();
-        msAggressive.push(deck[0]);
+        msAggressive.addCard = deck[0];
         deck.shift();
-        mrClueless.push(deck[0]);
+        mrClueless.addCard = deck[0];
         deck.shift();
-        player.push(deck[0]);
+        you.addCard = deck[0];
         deck.shift();
     }
-    addCardToHand('player', player);
-    addCardToHand('caution', mrCaution);
-    addCardToHand('aggresive', msAggressive);
-    addCardToHand('clueless', mrClueless);
+    addCardToBoard(you);
+    addCardToBoard(mrCaution);
+    addCardToBoard(msAggressive);
+    addCardToBoard(mrClueless);
 
-    startRound();
+    //startRound();
 }
 
-function addCardToHand(person, arr)
+function addCardToBoard(person)
 {
     var player = BOARD.querySelector('#'+person.id);
     console.log(person.id)
     person.hand.forEach(card => {
         var elem = document.createElement('img');
-        if(person == 'player')
+        if(person.id == 'you')
             elem.src = 'cards/' + card.name;
         else
             elem.src = 'card_back.png'
@@ -100,4 +132,5 @@ function addCardToHand(person, arr)
 
 function startRound()
 {
+    // CALUCLATE HAND VALUE
 }
