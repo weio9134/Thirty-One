@@ -8,24 +8,20 @@ html
 } */
 img
 {
-  height: 100px;
+  height: 180px;
   border-radius: 3px;
 }
 
 #board
 {
   display: grid;
-  grid-template-columns: 300px auto 300px;
-  grid-template-rows: 1fr 2fr 1fr;
+  grid-template-columns: repeat(3, auto);
+  grid-template-rows: repeat(3, minmax(300px, auto));
 }
 #board > div
 {
   border: 1px solid black;
-}
-
-#pile
-{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
