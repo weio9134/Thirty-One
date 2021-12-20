@@ -127,9 +127,7 @@ function displayAllHand()
 {
 
     var people = [mrCaution, msAggressive, mrClueless, you];
-    for(var i = 0; i < people.length; i++)
-    {
-        var person = people[i];
+    people.forEach(person => {
         var player = board.querySelector('#'+person.id);
         person.hand.forEach(card => {
             var elem = document.createElement('img');
@@ -139,7 +137,7 @@ function displayAllHand()
                 elem.src = 'card_back.png';
             player.appendChild(elem);
         });
-    }
+    });
 }
 
 function displayPile()
