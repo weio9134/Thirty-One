@@ -1,3 +1,2 @@
 # Thirty-One
-no yoinking code >:(
-blah blah legal stuff blah blah
+blah blah legal stuff blah blah no yoinking code >:(
