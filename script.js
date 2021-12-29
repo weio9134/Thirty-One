@@ -10,9 +10,11 @@ score = document.getElementById('score');
 cardArray = [];
 deckArray = [];
 cardsChosen = [];
-yourTurn = true;
 
 knockCalled = false;
+
+//MS AGGRESSIVE LOCK SWITCHES
+firstTurn = true;
 
 class Card 
 {
@@ -87,43 +89,52 @@ function setBoard()
     display();
 }
 
-function display()
+function display(reveal = false)
 {
-    //REMOVES ALL CHILD NODES
-    CAUTION.querySelectorAll('*').forEach(n => n.remove());
-    AGGRESSIVE.querySelectorAll('*').forEach(n => n.remove());
-    CLUELESS.querySelectorAll('*').forEach(n => n.remove());
-    PLAYER.querySelectorAll('*').forEach(n => n.remove());
+    //REMOVES ALL CHILD IMG NODES
+    CAUTION.querySelectorAll('img').forEach(n => n.remove());
+    AGGRESSIVE.querySelectorAll('img').forEach(n => n.remove());
+    CLUELESS.querySelectorAll('img').forEach(n => n.remove());
 
     //APPEND NEW NODES
     player.forEach(card => PLAYER.appendChild(card));
-    for(var i = 0; i < 3; i++)
-    {
-        var back = document.createElement('img');
-        back['src'] = 'card_back.png';
-        CAUTION.appendChild(back);
-        back1 = back.cloneNode();
-        AGGRESSIVE.appendChild(back1);
-        back2 = back.cloneNode();
-        CLUELESS.appendChild(back2);
-    }
     DISCARD.appendChild(discard)
     DECK.appendChild(deck)
+    if(reveal)
+    {
+        mrCaution.forEach(card => CAUTION.appendChild(card));
+        msAggressive.forEach(card => AGGRESSIVE.appendChild(card));
+        mrClueless.forEach(card => CLUELESS.appendChild(card));
+    }
+    else
+        for(var i = 0; i < 3; i++)
+        {
+            var back = document.createElement('img');
+            back['src'] = 'card_back.png';
+            CAUTION.appendChild(back);
+            back1 = back.cloneNode();
+            AGGRESSIVE.appendChild(back1);
+            back2 = back.cloneNode();
+            CLUELESS.appendChild(back2);
+        }
 
     //UPDATE SCORES
     score.innerHTML = calculateScore(player);
 }
 
 function calculateScore(hand)
-{
+{ 
     var cards = hand.map(x => cardArray[x['data-id']])
 
+    //SAME SUIT RETURN SUM
     if(cards[0].suit == cards[1].suit && cards[0].suit == cards[2].suit)
         return cards[0].value + cards[1].value + cards[2].value;
 
+    //SAME CARD RETURN 30
     if(cards[0].id%13 == cards[1].id%13 && cards[0].id%13 == cards[2].id%13)
         return 30;
 
+    //SORT BY SUIT THEN RETURN GREATER SUM
     cards.sort((a, b) => (a.suit > b.suit) ? 1 : -1);
     var compare = (a,b) => (a.suit == b.suit) ? a.value + b.value : Math.max(a.value, b.value);
     return Math.max(compare(cards[0], cards[1]), compare(cards[1], cards[2]));
@@ -154,11 +165,7 @@ function switchYourCard()
         }
         cardsChosen = [];
         display();
-
-        //AFTER YOU SWAP ITS THE AIS TURN
-        yourTurn = false;
-        if(!yourTurn)
-            startRound();
+        startRound();
     }
 }
 
@@ -182,7 +189,56 @@ function startRound()
 
 function aggresiveMove()
 {
-    console.log('angy')
+    //IF START WITH 16, KNOCK
+    if(firstTurn && calculateScore(msAggressive) >= 16)
+        knock();
+    firstTurn = false;
+
+    //TURNS TO CARD OBJECT THEN SORT BY FACE VALUE
+    var cards = msAggressive.map(x => cardArray[x['data-id']])
+    cards = cards.sort((a, b) => (a.id%13 > b.id%13) ? 1 : -1);
+    
+    // cards.forEach(n => console.log(n.name))
+
+    var hasAce = (cards) => ((cards[0].id%13 == 0) ? true : false);
+    // console.log(hasAce(cards))
+    var hasPair = (cards) => ((cards[0].id%13 == cards[1].id%13 || cards[1].id%13 == cards[2].id%13) ? true : false);
+    // console.log(hasPair(cards))
+
+    //IF HAVE ACE --> GO FOR 31
+    //IF HAVE PAIR --> GO FOR 30
+    //IF NO STRAT GO FOR BEST SWAP & KNOCK AT 20, GET STRAT LATER 
+    if(hasAce(cards))
+        goFor31(cards);
+    else if(hasPair(cards))
+        goFor30(cards);
+    else
+        bestSwap(cards);
+}
+
+function getPairs(hand)
+{
+    var pairs = [];
+    if(hand[0].id%13 == hand[1].id%13)
+        pairs = [hand[0], hand[1]];
+    else if(hand[1].id%4 == hand[2].id%4)
+        pairs = [hand[1], hand[2]];
+    return pairs;
+}
+
+function goFor30(hand)
+{
+    console.log('long live triples')
+}
+
+function goFor31(hand)
+{
+    console.log('long live aces')
+}
+
+function bestSwap(hand)
+{
+    console.log('looking looking...')
 }
 
 function cautiousMove()

@@ -8,21 +8,38 @@
   <body onload = 'initialize()'>
     <div id = 'board'>
       <div id = 'lives'>1</div>
-      <div id = 'caution'></div>
+
+      <div id = 'caution' class = 'player'> 
+        <div class = 'name'> Mr.Cautious </div> 
+      </div> 
+
       <div id = 'miscellaneous'>3</div>
-      <div id = 'aggressive'></div>
-      <div id = 'pile' style = 'gap: 50px'>
-        <div id = 'discard'></div>
+
+      <div id = 'aggressive' class = 'player'> 
+        <div class = 'name'> Ms.Aggressive </div> 
+      </div>
+
+      <div id = 'pile' class = 'player'>
+        <div class = 'name'> Card Pile </div>
+        <div id = 'discard' style = 'margin-left: 5px'></div>
         <div id = 'deck'></div>
       </div>
-      <div id = 'clueless'></div>
-      <div id = 'rules'>
-        <div style = 'font-size: 25px'> Your hand's value: <span id = 'score'></span> </div>
-        <a href = 'rule.html' class = 'go' style = 'margin-top: 25px'> Rules </a>
+
+      <div id = 'clueless' class = 'player'> 
+        <div class = 'name'> Mr.Clueless </div> 
       </div>
-      <div id = 'player'></div>
+
+      <div id = 'rules'>
+        <a href = 'rule.html' class = 'go' style = 'margin-top: 100px'> Rules </a>
+      </div>
+
+      <div id = 'player' class = 'player'> 
+        <div class = 'name'> Your hand's value: <span id = 'score'></span> </div>
+      </div>
+
       <div id = 'log'>9</div>
     </div>
-    <script src = 'script.js'></script>
+
+    <script src="script.js"></script>
   </body>
 </html>

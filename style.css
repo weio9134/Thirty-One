@@ -16,15 +16,25 @@ img
 {
   display: grid;
   grid-template-columns: repeat(3, auto);
-  grid-template-rows: repeat(3, minmax(300px, auto));
+  grid-template-rows: repeat(3, minmax(283px, auto));
 }
-#board > div
+.player
 {
-  border: 1px solid black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+	display: grid;
+	grid-template-rows: 35px auto;
+	grid-template-columns: repeat(3, auto);
+	grid-column-gap: 5px;
+	justify-self: center;
 }
+.name
+{
+	grid-column: span 3;
+	justify-self: center;
+	text-decoration: underline;
+	font: lighter 20px 'Courier New';
+	color: rgb(233, 232, 232);
+}
+
 #rules
 {
 	display: flex;
@@ -32,6 +42,7 @@ img
 	align-items: center;
 	color: white;
 }
+
 .go
 {
   font-size: 150%;
