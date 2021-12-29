@@ -11,15 +11,10 @@ cardArray = [];
 deckArray = [];
 cardsChosen = [];
 
-yourTurn = true;
 knockCalled = false;
 
 //MS AGGRESSIVE LOCK SWITCHES
 firstTurn = true;
-
-yourTurn = true;
-
-knockCalled = false;
 
 class Card 
 {
@@ -93,27 +88,6 @@ function setBoard()
     
     display();
 }
-
-function display()
-{
-    //REMOVES ALL CHILD NODES
-    CAUTION.querySelectorAll('*').forEach(n => n.remove());
-    AGGRESSIVE.querySelectorAll('*').forEach(n => n.remove());
-    CLUELESS.querySelectorAll('*').forEach(n => n.remove());
-    PLAYER.querySelectorAll('*').forEach(n => n.remove());
-
-    //APPEND NEW NODES
-    player.forEach(card => PLAYER.appendChild(card));
-    for(var i = 0; i < 3; i++)
-    {
-        var back = document.createElement('img');
-        back['src'] = 'card_back.png';
-        CAUTION.appendChild(back);
-        back1 = back.cloneNode();
-        AGGRESSIVE.appendChild(back1);
-        back2 = back.cloneNode();
-        CLUELESS.appendChild(back2);
-    }
 
 function display(reveal = false)
 {
@@ -191,11 +165,7 @@ function switchYourCard()
         }
         cardsChosen = [];
         display();
-
-        //AFTER YOU SWAP ITS THE AIS TURN
-        yourTurn = false;
-        if(!yourTurn)
-            startRound();
+        startRound();
     }
 }
 
@@ -228,7 +198,7 @@ function aggresiveMove()
     var cards = msAggressive.map(x => cardArray[x['data-id']])
     cards = cards.sort((a, b) => (a.id%13 > b.id%13) ? 1 : -1);
     
-    cards.forEach(n => console.log(n.name))
+    // cards.forEach(n => console.log(n.name))
 
     var hasAce = (cards) => ((cards[0].id%13 == 0) ? true : false);
     // console.log(hasAce(cards))
