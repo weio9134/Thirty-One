@@ -26,10 +26,6 @@ img
 	grid-column-gap: 5px;
 	justify-self: center;
 }
-<<<<<<< Updated upstream
-
-#to-rule
-=======
 .name
 {
 	grid-column: span 3;
@@ -48,18 +44,17 @@ img
 }
 
 .go
->>>>>>> Stashed changes
 {
   font-size: 150%;
   text-align: center;
-	color: white;
-	padding-top: 1.8em;
-	display: inline-block;
-	position: relative;
-	border-color: aquamarine;
-	transition: all .3s ease-out;
+  color: white;
+  padding-top: 1.8em;
+  display: inline-block;
+  position: relative;
+  border-color: aquamarine;
+  transition: all .3s ease-out;
 }
-#to-rule:before
+.go:before
 {
 	content: '▲';
 	font-size: 0.9em;
@@ -75,12 +70,24 @@ img
 	border-color: inherit;
 	transition: transform .5s ease-in;
 }
-#to-rule:hover
+.go:hover
 {
 	color: pink;
 	border-color: pink;
 }
-#to-rule:hover:before
+.go:hover:before
 {
 	transform: rotate(360deg);
+}
+
+h1
+{
+	font-family: 'Courier New', monospace;
+	text-decoration-line: underline;
+	color: white;
+}
+ul
+{
+	color: white;
+	font-size: 25px;
 }

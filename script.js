@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 const CAUTION = document.getElementById('caution');
 const AGGRESSIVE = document.getElementById('aggressive');
 const CLUELESS = document.getElementById('clueless');
@@ -19,82 +17,104 @@ knockCalled = false;
 //MS AGGRESSIVE LOCK SWITCHES
 firstTurn = true;
 
->>>>>>> Stashed changes
+yourTurn = true;
+
+knockCalled = false;
+
 class Card 
 {
-    constructor(suit, value) 
+    constructor(s, v, i) 
     {
-        switch(suit)
+        switch (s) 
         {
-            case 1: this.Suit = 'clubs'; break;
-            case 2: this.Suit = 'diamonds'; break;
-            case 3: this.Suit = 'hearts'; break;
-            case 4: this.Suit = 'spades'; break;
+            case (1): this.suit = 'clubs'; break;
+            case (2): this.suit = 'diamonds'; break;
+            case (3): this.suit = 'hearts'; break;
+            case (4): this.suit = 'spades'; break;
         }
-
-        this.Name = value + '_of_' + this.Suit + '.png';
-
-        if(value === 1)
-            this.Value = 11;
-        else if(value >= 10)
-            this.Value = 10;
-        else
-            this.Value = value;
-    }
-    get suit()
-    {
-        return this.Suit;
-    }
-    get value()
-    {
-        return this.Value;
-    }
-    get name()
-    {
-        return this.Name;
+        this.name = v + '_of_' + this.suit + '.png';
+        this.value = v;
+        if (v == 1)
+            this.value = 11;
+        else if (v >= 10)
+            this.value = 10;
+        this.id = i;
     }
 }
 
-<<<<<<< Updated upstream
-class Player
+function initialize()
 {
-    constructor(id)
+    //CREATES AN ARRAY OF ALL IMG OBJECTS
+    var id = 0;
+    for(var i = 1; i <= 4; i++)
+        for(var j = 1; j <= 13; j++)
+        {
+            cardArray.push(new Card(i, j, id));
+            id++;
+        }
+        
+    //TURNS ALL IMAGE OBJECTS INTO NODES
+    for(var i = 0; i < cardArray.length; i++)
     {
-        this.ID = id;
-        this.Hand = [];
+        var card = document.createElement('img');
+        card['src'] = 'cards/' + cardArray[i].name;
+        card['data-id'] = i;
+        card.addEventListener('click', switchYourCard);
+        deckArray.push(card);
     }
-    /**
-     * @param {Card} card
-     */
-    set addCard(card)
+
+    setBoard()
+}
+
+function setBoard()
+{
+    deckArray.sort(() => 0.5 - Math.random());
+
+    mrCaution = [];
+    msAggressive = [];
+    mrClueless = [];
+    player = [];
+
+    //HAND OUT CARDS FROM DECK
+    discard = deckArray[0];
+    deck = deckArray[1];
+    deckArray.splice(0,2);
+    for(var i = 0; i < 3; i++)
     {
-        this.Hand.push(card);
+        mrCaution.push(deckArray[i]);
+        deckArray.shift();
+        msAggressive.push(deckArray[i]);
+        deckArray.shift();
+        mrClueless.push(deckArray[i]);
+        deckArray.shift();
+        player.push(deckArray[i]);
+        deckArray.shift();
     }
-    /**
-     * @param {int} index
-     */
-    set removeCard(index)
+    
+    display();
+}
+
+function display()
+{
+    //REMOVES ALL CHILD NODES
+    CAUTION.querySelectorAll('*').forEach(n => n.remove());
+    AGGRESSIVE.querySelectorAll('*').forEach(n => n.remove());
+    CLUELESS.querySelectorAll('*').forEach(n => n.remove());
+    PLAYER.querySelectorAll('*').forEach(n => n.remove());
+
+    //APPEND NEW NODES
+    player.forEach(card => PLAYER.appendChild(card));
+    for(var i = 0; i < 3; i++)
     {
-        var temp = this.Hand[index];
-        this.Hand.splice(index, 1);
-        return temp;
+        var back = document.createElement('img');
+        back['src'] = 'card_back.png';
+        CAUTION.appendChild(back);
+        back1 = back.cloneNode();
+        AGGRESSIVE.appendChild(back1);
+        back2 = back.cloneNode();
+        CLUELESS.appendChild(back2);
     }
-    get id()
-    {
-        return this.ID;
-    }
-    get hand()
-    {
-        return this.Hand;
-    }
-    get value()
-    {
-        var sum = 0;
-        for(var i = 0; i < this.Hand.length; i++)
-            sum += this.Hand[i].value;
-        return sum;
-    }
-=======
+
 function display(reveal = false)
 {
     //REMOVES ALL CHILD IMG NODES
@@ -126,30 +146,10 @@ function display(reveal = false)
 
     //UPDATE SCORES
     score.innerHTML = calculateScore(player);
->>>>>>> Stashed changes
 }
 
-function initialize()
-{
-<<<<<<< Updated upstream
-    board = document.getElementById('board');
-    // INITIALIZE PLAYER OBJECT
-    mrCaution = new Player('caution');
-    msAggressive = new Player('aggressive');
-    mrClueless= new Player('clueless');
-    you = new Player('you');
-
-    // INITIALIZE A DECK OF 52 CARDS
-    deck = [];
-    for(var i = 1; i < 5; i++)
-        for(var j = 1; j < 14; j++)
-            deck.push(new Card(i, j));
-    deck.sort(() => 0.5-Math.random());
-    discard = [deck[0]];
-    deck.shift();
-
-    startGame();
-=======
+function calculateScore(hand)
+{ 
     var cards = hand.map(x => cardArray[x['data-id']])
 
     //SAME SUIT RETURN SUM
@@ -164,36 +164,52 @@ function initialize()
     cards.sort((a, b) => (a.suit > b.suit) ? 1 : -1);
     var compare = (a,b) => (a.suit == b.suit) ? a.value + b.value : Math.max(a.value, b.value);
     return Math.max(compare(cards[0], cards[1]), compare(cards[1], cards[2]));
->>>>>>> Stashed changes
 }
 
-function startGame()
+function switchYourCard()
 {
+    //APPENDS CARDS FOR SWAP
+    if(discard == this || deck == this)
+        cardsChosen[0] = this;
+    else
+        cardsChosen[1] = this;
 
-    mrCaution = new Player('caution');
-    msAggressive = new Player('aggressive');
-    mrClueless= new Player('clueless');
-    you = new Player('you');
-    discard = [deck[0]];
-    deck.shift();
+    //ONLY SWAP IF BOTH SLOTS ARE FILLED
+    if(!(cardsChosen[0] == undefined || cardsChosen[1] == undefined))
+    {
+        var tempCard = cardsChosen[0];
+        var index = player.indexOf(cardsChosen[1])
+        if(discard == cardsChosen[0])
+        {
+            discard = player[index];
+            player[index] = tempCard;
+        }
+        else
+        {
+            deck = player[index];
+            player[index] = tempCard;
+        }
+        cardsChosen = [];
+        display();
 
+        //AFTER YOU SWAP ITS THE AIS TURN
+        yourTurn = false;
+        if(!yourTurn)
+            startRound();
+    }
+}
 
-    // HAND OUT CARDS TO PLAYER
+function startRound()
+{
     for(var i = 0; i < 3; i++)
     {
-        mrCaution.addCard = deck[0];
-        deck.shift();
-        msAggressive.addCard = deck[0];
-        deck.shift();
-        mrClueless.addCard = deck[0];
-        deck.shift();
-        you.addCard = deck[0];
-        deck.shift();
+        switch(i)
+        {
+            case(0): aggresiveMove(); break;
+            case(1): cautiousMove(); break;
+            case(2): cluelessMove(); break;
+        }
     }
-<<<<<<< Updated upstream
-    displayAllHand();
-    displayPile();
-=======
     yourTurn = true;
     updateLife();
 
@@ -259,60 +275,38 @@ function cautiousMove()
 {
     console.log('scared')
 }
->>>>>>> Stashed changes
 
-    //startRound();
-}
-
-<<<<<<< Updated upstream
-function displayAllHand()
-=======
-function swapCard()
+function cluelessMove()
 {
-    console.log('swappy swappy')
+    console.log('idk')
 }
 
 function knock()
->>>>>>> Stashed changes
 {
+    //KNOCK MAY ONLY BE CALLED ONCE
+    if(knockCalled)
+        return;
 
-    var people = [mrCaution, msAggressive, mrClueless, you];
-    people.forEach(person => {
-        var player = board.querySelector('#'+person.id);
-        person.hand.forEach(card => {
-            var elem = document.createElement('img');
-            if(person.id == 'you')
-                elem.src = 'cards/' + card.name;
-            else
-                elem.src = 'card_back.png';
-            player.appendChild(elem);
-        });
-    });
-}
-
-<<<<<<< Updated upstream
-function displayPile()
-=======
-function stay()
-{
-    console.log('me stay');
+    knockCalled = true;
+    console.log('knock knock')
 }
 
 function updateLife()
->>>>>>> Stashed changes
 {
-    var discP = board.querySelector('#discard');
-    var deckP = board.querySelector('#deck');
-    var image1 = document.createElement('img');
-    var image2 = document.createElement('img');
-    image1.src = 'cards/' + discard[0].name;
-    discP.appendChild(image1);
-    image2.src = 'cards/' + deck[0].name;
-    deckP.appendChild(image2);
-
+    console.log('vibe check')
 }
 
-function startRound()
+function roundOver()
 {
-    // CALUCLATE HAND VALUE
+    return false;
+}
+
+function gameOver()
+{
+    return false;
+}
+
+function endScreen()
+{
+    console.log('ded')
 }
