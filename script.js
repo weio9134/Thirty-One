@@ -15,6 +15,8 @@ knockCalled = false;
 
 //MS AGGRESSIVE LOCK SWITCHES
 firstTurn = true;
+strat30 = true;
+strat31 = true;
 
 class Card 
 {
@@ -69,37 +71,36 @@ function setBoard()
     msAggressive = [];
     mrClueless = [];
     player = [];
+    deck = [];
 
     //HAND OUT CARDS FROM DECK
     discard = deckArray[0];
-    deck = deckArray[1];
-    deckArray.splice(0,2);
     for(var i = 0; i < 3; i++)
     {
-        mrCaution.push(deckArray[i]);
-        deckArray.shift();
-        msAggressive.push(deckArray[i]);
-        deckArray.shift();
-        mrClueless.push(deckArray[i]);
-        deckArray.shift();
-        player.push(deckArray[i]);
-        deckArray.shift();
+        mrCaution.push(deckArray[1 + i*4]);
+        msAggressive.push(deckArray[2 + i*4]);
+        mrClueless.push(deckArray[3 + i*4]);
+        player.push(deckArray[4 + i*4]);
     }
+    deck = deckArray.slice(13, deckArray.length);
     
     display();
 }
 
-function display(reveal = false)
+function display(reveal = true)
 {
     //REMOVES ALL CHILD IMG NODES
     CAUTION.querySelectorAll('img').forEach(n => n.remove());
     AGGRESSIVE.querySelectorAll('img').forEach(n => n.remove());
     CLUELESS.querySelectorAll('img').forEach(n => n.remove());
+    PLAYER.querySelectorAll('img').forEach(n => n.remove());
+    DISCARD.querySelectorAll('img').forEach(n => n.remove());
+    DECK.querySelectorAll('img').forEach(n => n.remove());
 
     //APPEND NEW NODES
     player.forEach(card => PLAYER.appendChild(card));
-    DISCARD.appendChild(discard)
-    DECK.appendChild(deck)
+    DISCARD.appendChild(discard);
+    DECK.appendChild(deck[0]);
     if(reveal)
     {
         mrCaution.forEach(card => CAUTION.appendChild(card));
@@ -143,9 +144,9 @@ function calculateScore(hand)
 function switchYourCard()
 {
     //APPENDS CARDS FOR SWAP
-    if(discard == this || deck == this)
+    if(discard == this || deck[0] == this)
         cardsChosen[0] = this;
-    else
+    if(player.indexOf(this) > -1)
         cardsChosen[1] = this;
 
     //ONLY SWAP IF BOTH SLOTS ARE FILLED
@@ -153,6 +154,7 @@ function switchYourCard()
     {
         var tempCard = cardsChosen[0];
         var index = player.indexOf(cardsChosen[1])
+
         if(discard == cardsChosen[0])
         {
             discard = player[index];
@@ -160,9 +162,11 @@ function switchYourCard()
         }
         else
         {
-            deck = player[index];
             player[index] = tempCard;
+            deck.shift();
+            deck.push(player[index]);
         }
+
         cardsChosen = [];
         display();
         startRound();
@@ -180,8 +184,6 @@ function startRound()
             case(2): cluelessMove(); break;
         }
     }
-    yourTurn = true;
-    updateLife();
 
     if(gameOver())
         endScreen();
@@ -190,55 +192,171 @@ function startRound()
 function aggresiveMove()
 {
     //IF START WITH 16, KNOCK
-    if(firstTurn && calculateScore(msAggressive) >= 16)
-        knock();
     firstTurn = false;
+    if(firstTurn && calculateScore(msAggressive) >= 16)
+    {
+        knock();
+        return;
+    }
 
     //TURNS TO CARD OBJECT THEN SORT BY FACE VALUE
     var cards = msAggressive.map(x => cardArray[x['data-id']])
     cards = cards.sort((a, b) => (a.id%13 > b.id%13) ? 1 : -1);
-    
-    // cards.forEach(n => console.log(n.name))
 
     var hasAce = (cards) => ((cards[0].id%13 == 0) ? true : false);
-    // console.log(hasAce(cards))
     var hasPair = (cards) => ((cards[0].id%13 == cards[1].id%13 || cards[1].id%13 == cards[2].id%13) ? true : false);
-    // console.log(hasPair(cards))
 
     //IF HAVE ACE --> GO FOR 31
-    //IF HAVE PAIR --> GO FOR 30
+    //IF HAVE PAIR --> GO FOR 30 (OR KNOCK ON 20)
     //IF NO STRAT GO FOR BEST SWAP & KNOCK AT 20, GET STRAT LATER 
-    if(hasAce(cards))
+    if(strat31 && hasAce(cards))
+    {
+        strat30 = false;
         goFor31(cards);
-    else if(hasPair(cards))
+    }
+    else if(calculateScore(msAggressive) >= 20)
+            knock();
+    else if(strat30 && hasPair(cards))
+    {
+        strat31 = false;
         goFor30(cards);
+    }
     else
-        bestSwap(cards);
+        bestSwap(msAggressive);
 }
 
 function getPairs(hand)
 {
-    var pairs = [];
     if(hand[0].id%13 == hand[1].id%13)
-        pairs = [hand[0], hand[1]];
-    else if(hand[1].id%4 == hand[2].id%4)
-        pairs = [hand[1], hand[2]];
-    return pairs;
+        return [hand[0], hand[1]];
+    else if(hand[1].id%13 == hand[2].id%13)
+        return [hand[1], hand[2]];
+    return [];
 }
 
 function goFor30(hand)
 {
-    console.log('long live triples')
+    var pairs = getPairs(hand);
+    var replaceCard;
+    if(hand.indexOf(pairs[0]) == 0)
+        replaceCard = hand[2];
+    else
+        replaceCard = hand[0]
+    bestSwap(msAggressive, replaceCard, 'value', pairs[0].id%13);
 }
 
 function goFor31(hand)
 {
-    console.log('long live aces')
+    if(calculateScore(msAggressive) == 31)
+    {
+        knock();
+        return;
+    }
+
+    //GET INDEX OF POS CARD TO SWAP
+    var card = [];
+    if(hand[1].suit != hand[0].suit)
+        card.push(hand[1]);
+    if(hand[2].suit != hand[0].suit)
+        card.push(hand[2]);
+    
+    //IF ALL CARDS ARE SAME SUIT, SWAP LOWEST VALUE CARD
+    if(card.length == 0)
+        if(hand[1].value < hand[2].value)
+            card.push(hand[1]);
+        else
+            card.push(hand[2]);
+
+    bestSwap(msAggressive, card[Math.floor(Math.random()*card.length)], 'suit', hand[0].id%4)
 }
 
-function bestSwap(hand)
+function bestSwap(person, card = undefined, targetType = undefined, targetValue = undefined)
 {
-    console.log('looking looking...')
+    var posOptions = [];
+
+    //TURN CARD PARAMETER INTO NODE FOR COMPARISON
+    if(card != undefined)
+        for(var i = 0; i < deckArray.length; i++)
+            if(deckArray[i]['data-id'] == card.id)
+            {
+                card = deckArray[i];
+                break;
+            }
+    
+    //PARAMETERS SPECIFIES GOING FOR STRAT; ELSE GO FOR HIGHEST COMBO
+    if(targetType != undefined)
+    {
+        //IF WANT VALUE MOD BY 13; WANT SUIT MOD BY 4
+        var divisor;
+        if(targetType == 'value')
+            divisor = 13;
+        else
+            divisor = 4;
+
+        //CHECK IF PILES ARE ELIGIBLE FOR SWAP; ELSE SWITCH WITH DECK
+        if(deck[0]['data-id']%divisor == targetValue)
+            posOptions.push(deck[0]);
+        if(discard['data-id']%divisor == targetValue)
+            posOptions.push(discard);
+        
+        if(posOptions.length == 0)
+            swapCards(person, card, deck[0]);
+        else
+        {
+            var selectCard = posOptions[Math.floor(Math.random()*posOptions.length)];
+            swapCards(person, card, selectCard);
+        }
+    }
+    else
+    {
+        var currentScore = calculateScore(person);
+
+        //SWAP ARRAY: NEW POTENTIAL BEST ARRAY
+        var swap = [];
+        for(var i = 0; i < 3; i++)
+        {
+            var testing = person.slice(0);
+            testing[i] = deck[0];
+            var newScore1 = calculateScore(testing);
+
+            testing[i] = discard;
+            var newScore2 = calculateScore(testing);
+            
+            //IF EITHER NEW SCORE IS GREATER THAN CURRENT SET SWAP TO NEW DECK
+            var bestScore = Math.max(currentScore, Math.max(newScore1, newScore2));
+            swap = testing;
+            if(bestScore == newScore1)
+                swap[i] = deck[0];
+        }
+        var index = 0;
+
+        //IF THERE WAS A HIGHER DECK COMBO, SWITCH TO THAT
+        if(swap.length > 0)
+        {
+            for(var i = 0; i < 3; i++)
+                if(swap[i] != person[i])
+                {
+                    index = i;
+                    break;
+                }
+        }
+        swapCards(person, person[index], swap[index]);
+    }
+}
+
+function swapCards(person, card1, card2)
+{
+    var index = person.indexOf(card1);
+    person[index] = card2;
+
+    if(deck[0] == card2)
+    {
+        deck.shift();
+        deck.push(card1);
+    }
+    else
+        discard = card1;
+    display();
 }
 
 function cautiousMove()
@@ -258,7 +376,7 @@ function knock()
         return;
 
     knockCalled = true;
-    console.log('knock knock')
+    alert('someone knocked')
 }
 
 function updateLife()
