@@ -31,13 +31,24 @@ img
 	font: lighter 20px 'Courier New';
 	color: rgb(233, 232, 232);
 }
-
 #rules
 {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	color: white;
+}
+#log-container
+{
+	height: 150px;
+	width: 250px;
+	font: lighter 15px 'Courier New';
+	color: black;
+	margin-top: 10px;
+	background-color: aliceblue;
+	padding: 5px;
+	justify-self: center;
+	overflow-y: auto;
 }
 
 .go
@@ -85,6 +96,6 @@ h1
 }
 ul
 {
-	color: white;
+	color: rgb(233, 232, 232);
 	font-size: 25px;
 }
