@@ -7,16 +7,18 @@ const DISCARD = document.getElementById('discard');
 const DECK = document.getElementById('deck');
 
 score = document.getElementById('score');
+log = document.getElementById('log-container');
+
 cardArray = [];
 deckArray = [];
 cardsChosen = [];
-
-knockCalled = false;
 
 //MS AGGRESSIVE LOCK SWITCHES
 firstTurn = true;
 strat30 = true;
 strat31 = true;
+
+turn = 0;
 
 class Card 
 {
@@ -87,7 +89,7 @@ function setBoard()
     display();
 }
 
-function display(reveal = true)
+function display(reveal = false)
 {
     //REMOVES ALL CHILD IMG NODES
     CAUTION.querySelectorAll('img').forEach(n => n.remove());
@@ -167,23 +169,44 @@ function switchYourCard()
             deck.push(player[index]);
         }
 
+        turn = 0;
+        updateLog(getName(cardsChosen[0]));
         cardsChosen = [];
         display();
         startRound();
     }
 }
 
+function getName(card)
+{
+    var name = cardArray[card['data-id']].name;
+
+    //REPLACE ALL NON LETTERS AND CONVERT TO ACTUAL CARD NAME
+    name = name.replaceAll('_', ' ');
+    name = name.replaceAll('.png', '');
+    name = name.replaceAll('11 ', 'Jack ');
+    name = name.replaceAll('12 ', 'Queen ');
+    name = name.replaceAll('13 ', 'King ');
+    name = name.replaceAll('1 ', 'Ace ');
+
+    return name;
+}
+
+function move(i) 
+{ 
+    switch(i)
+    {
+        case(0): aggresiveMove(); break;
+        case(1): cautiousMove(); break;
+        case(2): cluelessMove(); break;
+    }
+}
+
 function startRound()
 {
+    //EACH AI SLEEP FOR 1-2S FOR DELAY
     for(var i = 0; i < 3; i++)
-    {
-        switch(i)
-        {
-            case(0): aggresiveMove(); break;
-            case(1): cautiousMove(); break;
-            case(2): cluelessMove(); break;
-        }
-    }
+        setTimeout(move, Math.round(Math.random()*2+1)*1000, i);
 
     if(gameOver())
         endScreen();
@@ -195,12 +218,12 @@ function aggresiveMove()
     firstTurn = false;
     if(firstTurn && calculateScore(msAggressive) >= 16)
     {
-        knock();
+        knock(1);
         return;
     }
 
     //TURNS TO CARD OBJECT THEN SORT BY FACE VALUE
-    var cards = msAggressive.map(x => cardArray[x['data-id']])
+    var cards = msAggressive.map(x => cardArray[x['data-id']]);
     cards = cards.sort((a, b) => (a.id%13 > b.id%13) ? 1 : -1);
 
     var hasAce = (cards) => ((cards[0].id%13 == 0) ? true : false);
@@ -215,11 +238,11 @@ function aggresiveMove()
         goFor31(cards);
     }
     else if(calculateScore(msAggressive) >= 20)
-            knock();
+            knock(1);
     else if(strat30 && hasPair(cards))
     {
         strat31 = false;
-        goFor30(cards);
+        goFor30(cards, 0);
     }
     else
         bestSwap(msAggressive);
@@ -234,15 +257,16 @@ function getPairs(hand)
     return [];
 }
 
-function goFor30(hand)
+function goFor30(hand, personIndex)
 {
+    var people = [msAggressive, mrCaution, mrClueless]
     var pairs = getPairs(hand);
     var replaceCard;
     if(hand.indexOf(pairs[0]) == 0)
         replaceCard = hand[2];
     else
         replaceCard = hand[0]
-    bestSwap(msAggressive, replaceCard, 'value', pairs[0].id%13);
+    bestSwap(people[personIndex], replaceCard, 'value', pairs[0].id%13);
 }
 
 function goFor31(hand)
@@ -356,27 +380,61 @@ function swapCards(person, card1, card2)
     }
     else
         discard = card1;
+    
+    turn++;
+    updateLog(getName(card2));
     display();
 }
 
 function cautiousMove()
 {
-    console.log('scared')
+    //IF HAVE GREATER THAN 27 VALUE KNOCK
+    if(calculateScore(mrCaution) >= 27)
+        knock(2);
+
+    //TURNS TO CARD OBJECT THEN SORT BY FACE VALUE
+    var cards = mrCaution.map(x => cardArray[x['data-id']]);
+    cards = cards.sort((a, b) => (a.id%13 > b.id%13) ? 1 : -1);
+    
+    var hasPair = (cards) => ((cards[0].id%13 == cards[1].id%13 || cards[1].id%13 == cards[2].id%13) ? true : false);
+
+    //IF HAVE PAIR GO FOR 30 ELSE BEST SWAP
+    if(hasPair(cards))
+        goFor30(cards, 1);
+    else
+        bestSwap(mrCaution);
+    
 }
 
 function cluelessMove()
 {
-    console.log('idk')
+    //IF SCORE 30 OR 31 KNOCK
+    if(calculateScore(mrClueless) >= 30)
+        knock(3);
+
+    //RANDOMLY PICK CARDS TO SWAP
+    var pickedCard;
+
+    if(Math.round(Math.random()*2))
+        pickedCard = deck[0];
+    else
+        pickedCard = discard;
+    
+    var cardToDiscard = mrClueless[Math.round(Math.random()*3)];
+
+    swapCards(mrClueless, cardToDiscard, pickedCard);
 }
 
-function knock()
+function knock(personIndex)
 {
-    //KNOCK MAY ONLY BE CALLED ONCE
-    if(knockCalled)
-        return;
-
-    knockCalled = true;
+    var people = [player, msAggressive, mrCaution, mrClueless];
     alert('someone knocked')
+}
+
+function updateLog(cardName)
+{
+    var names = ['You', 'Ms.Aggressive', 'Mr.Caution', 'Mr.Clueless'];
+    log.innerHTML += names[turn] + ' just swapped for ' + cardName + '<br><br>';
 }
 
 function updateLife()
