@@ -6,6 +6,8 @@
     <link href="style.css" rel="stylesheet" type="text/css"/>
   </head>
   <body onload = 'initialize()'>
+
+    <!-- GAME BOARD DISPLAY -->
     <div id = 'board'>
       <div id = 'lives'>1</div>
 
@@ -13,7 +15,9 @@
         <div class = 'name'> Mr.Cautious </div> 
       </div> 
 
-      <div id = 'miscellaneous'>3</div>
+      <div id = 'miscellaneous'>
+        <button id = 'callKnock' onclick = 'knock()'> Knock </button>
+      </div>
 
       <div id = 'aggressive' class = 'player'> 
         <div class = 'name'> Ms.Aggressive </div> 
@@ -40,6 +44,14 @@
       <div id = 'log' style = 'justify-self: center;'>
         <div class = 'name'> Moves Log </div>
         <div id = 'log-container'></div>
+      </div>
+    </div>
+
+    <!-- RESULT POPUP BOXS -->
+    <div id = 'container'>
+      <div id = 'box'>
+        <div id = 'closeButton' onclick = 'roundOver()'>&times;</div>
+        <div id = 'result'></div>
       </div>
     </div>
 

@@ -99,3 +99,63 @@ ul
 	color: rgb(233, 232, 232);
 	font-size: 25px;
 }
+
+#container
+{
+    background: rgba(0,0,0,.4);
+	display: none;
+	grid-template-columns: repeat(3, auto);
+	grid-template-rows: repeat(3, minmax(283px, auto));
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+#box
+{
+	grid-row-start: 2;
+    grid-column-start: 2;
+	margin-top: -60px;
+	margin-left: 90px;
+    background-color: #fff;
+    box-shadow: 10px 10px 60px #555;
+    display: inline-block;
+    height: auto;
+	width: 100px;
+    vertical-align: middle;
+    width: 60%;
+    position: relative;
+    border-radius: 8px;
+    padding: 15px 5%;
+}
+#result
+{
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: repeat(6, auto);
+  grid-row-gap: 10px;
+}
+
+#closeButton 
+{
+    background-color: #fff;
+    border: 3px solid #999;
+    border-radius: 50px;
+    cursor: pointer;
+    display: inline-block;
+    font-family: arial;
+    font-weight: bold;
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    font-size: 25px;
+    line-height: 30px;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+}
+#closeButton:hover 
+{
+    background-color: #ccc;
+}

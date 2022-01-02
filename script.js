@@ -6,6 +6,9 @@ const PLAYER = document.getElementById('player');
 const DISCARD = document.getElementById('discard');
 const DECK = document.getElementById('deck');
 
+const POPUPCONTAINER = document.getElementById('container');
+const RESULT = document.getElementById('result');
+
 score = document.getElementById('score');
 log = document.getElementById('log-container');
 
@@ -13,12 +16,15 @@ cardArray = [];
 deckArray = [];
 cardsChosen = [];
 
-//MS AGGRESSIVE LOCK SWITCHES
+//LOCK SWITCHES FOR MOVES
 firstTurn = true;
 strat30 = true;
 strat31 = true;
 
 turn = 0;
+
+knocked = false;
+turnsRemaining = 3;
 
 class Card 
 {
@@ -67,6 +73,14 @@ function initialize()
 
 function setBoard()
 {
+    //RESET VARIABLE FOR NEW ROUND
+    firstTurn = true;
+    strat30 = true;
+    strat31 = true;
+    turn = 0;
+    knocked = false;
+    turnsRemaining = 3;
+
     deckArray.sort(() => 0.5 - Math.random());
 
     mrCaution = [];
@@ -74,6 +88,9 @@ function setBoard()
     mrClueless = [];
     player = [];
     deck = [];
+
+    names = ['You', 'Ms.Aggressive', 'Mr.Caution', 'Mr.Clueless'];
+    people = [msAggressive, mrCaution, mrClueless];
 
     //HAND OUT CARDS FROM DECK
     discard = deckArray[0];
@@ -145,6 +162,15 @@ function calculateScore(hand)
 
 function switchYourCard()
 {
+    if(knocked)
+        if(turnsRemaining == 0)
+        {
+            showResult();
+            return;
+        }
+        else
+            turnsRemaining--;
+
     //APPENDS CARDS FOR SWAP
     if(discard == this || deck[0] == this)
         cardsChosen[0] = this;
@@ -169,9 +195,10 @@ function switchYourCard()
             deck.push(player[index]);
         }
 
-        turn = 0;
-        updateLog(getName(cardsChosen[0]));
+        updateLog(' just swapped for ', getName(cardsChosen[0]));
+
         cardsChosen = [];
+        yourTurn = false;
         display();
         startRound();
     }
@@ -192,24 +219,19 @@ function getName(card)
     return name;
 }
 
-function move(i) 
-{ 
-    switch(i)
-    {
-        case(0): aggresiveMove(); break;
-        case(1): cautiousMove(); break;
-        case(2): cluelessMove(); break;
-    }
-}
-
 function startRound()
 {
-    //EACH AI SLEEP FOR 1-2S FOR DELAY
-    for(var i = 0; i < 3; i++)
-        setTimeout(move, Math.round(Math.random()*2+1)*1000, i);
-
-    if(gameOver())
-        endScreen();
+    for(var i = 0; i < 3; i++)  
+    {
+        turn++;
+        switch(turn)
+        {
+            case(1): aggresiveMove(); break;
+            case(2): cautiousMove(); break;
+            case(3): cluelessMove(); break;
+        }
+    }
+    turn = 0;
 }
 
 function aggresiveMove()
@@ -218,7 +240,7 @@ function aggresiveMove()
     firstTurn = false;
     if(firstTurn && calculateScore(msAggressive) >= 16)
     {
-        knock(1);
+        knock();
         return;
     }
 
@@ -238,7 +260,10 @@ function aggresiveMove()
         goFor31(cards);
     }
     else if(calculateScore(msAggressive) >= 20)
-            knock(1);
+    {
+        knock();
+        return;
+    }
     else if(strat30 && hasPair(cards))
     {
         strat31 = false;
@@ -259,7 +284,6 @@ function getPairs(hand)
 
 function goFor30(hand, personIndex)
 {
-    var people = [msAggressive, mrCaution, mrClueless]
     var pairs = getPairs(hand);
     var replaceCard;
     if(hand.indexOf(pairs[0]) == 0)
@@ -370,6 +394,15 @@ function bestSwap(person, card = undefined, targetType = undefined, targetValue 
 
 function swapCards(person, card1, card2)
 {
+    if(knocked)
+        if(turnsRemaining == 0)
+        {
+            showResult();
+            return;
+        }
+        else
+            turnsRemaining--;
+
     var index = person.indexOf(card1);
     person[index] = card2;
 
@@ -381,8 +414,7 @@ function swapCards(person, card1, card2)
     else
         discard = card1;
     
-    turn++;
-    updateLog(getName(card2));
+    updateLog(' just swapped for ', getName(card2));
     display();
 }
 
@@ -390,7 +422,10 @@ function cautiousMove()
 {
     //IF HAVE GREATER THAN 27 VALUE KNOCK
     if(calculateScore(mrCaution) >= 27)
-        knock(2);
+    {
+        knock();
+        return;
+    }
 
     //TURNS TO CARD OBJECT THEN SORT BY FACE VALUE
     var cards = mrCaution.map(x => cardArray[x['data-id']]);
@@ -410,41 +445,120 @@ function cluelessMove()
 {
     //IF SCORE 30 OR 31 KNOCK
     if(calculateScore(mrClueless) >= 30)
-        knock(3);
+    {
+        knock();
+        return;
+    }
 
     //RANDOMLY PICK CARDS TO SWAP
     var pickedCard;
 
-    if(Math.round(Math.random()*2))
+    if(Math.floor(Math.random()*2))
         pickedCard = deck[0];
     else
         pickedCard = discard;
     
-    var cardToDiscard = mrClueless[Math.round(Math.random()*3)];
+    var cardToDiscard = mrClueless[Math.floor(Math.random()*3)];
 
     swapCards(mrClueless, cardToDiscard, pickedCard);
 }
 
-function knock(personIndex)
-{
-    var people = [player, msAggressive, mrCaution, mrClueless];
-    alert('someone knocked')
+function knock()
+{ 
+    //ONLY ONE PERSON MAY KNOCK
+    if(knocked)
+        return;
+    knocked = true;
+
+    //UPDATES LOCKS AND CONTINUE LAST FEW TURNS
+    alert(names[turn] + ' knocked')
+    updateLog(' just knocked!');
+    if(turn == 0)
+    {
+        turnsRemaining--;
+        startRound();
+    }
 }
 
-function updateLog(cardName)
+function updateLog(str, cardName = '')
 {
-    var names = ['You', 'Ms.Aggressive', 'Mr.Caution', 'Mr.Clueless'];
-    log.innerHTML += names[turn] + ' just swapped for ' + cardName + '<br><br>';
+    log.innerHTML += names[turn] + str + cardName + '<br><br>';
+}
+
+function showResult()
+{
+    display(true);
+    POPUPCONTAINER.style.display = 'grid';
+
+    var scores = [];
+
+    //APPEND HEADER
+    RESULT.appendChild(createText('Players', 'header'));
+    RESULT.appendChild(createText('Scores', 'header'));
+
+    //APPEND PLAYER SCORES
+    for(var i = 0; i < 4; i++)
+    {
+        RESULT.appendChild(createText(names[i]));
+
+        if(i == 0)
+            scores.push(calculateScore(player));
+        else
+            scores.push(calculateScore(people[i-1]));
+
+        RESULT.appendChild(createText(scores[i]));
+    }
+
+    //APPEND LOSER
+    var smallest = scores[0];
+    var index = 0;
+    var tie = false;
+    for(var i = 1; i < scores.length; i++)
+    {
+        if(smallest == scores[i])
+        {
+            tie = true;
+            continue;
+        }
+        if(smallest > scores[i])
+        {
+            smallest = scores[i];
+            index = i;
+        }
+    }
+    RESULT.appendChild(createText('Loser:', 'header'));
+    if(tie)
+        RESULT.appendChild(createText('TIE'));
+    else
+        RESULT.appendChild(createText(names[index]));
+}
+
+function createText(str, type = '')
+{   
+    var x = document.createElement('div');
+    x.innerHTML = str;
+    x.style.font = "lighter 20px 'Courier New'";
+    
+    if(type == 'header')
+    {
+        x.style.textDecoration = 'underline';
+        x.style.fontWeight = 'bold';
+    }
+    return x;
+}
+
+function roundOver()
+{
+    POPUPCONTAINER.style.display = 'none';
+    RESULT.innerHTML = '';
+    log.innerHTML = 'NEW ROUND <br>';
+    updateLife();
+    setBoard();
 }
 
 function updateLife()
 {
     console.log('vibe check')
-}
-
-function roundOver()
-{
-    return false;
 }
 
 function gameOver()
