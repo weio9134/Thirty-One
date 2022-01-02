@@ -1,7 +1,13 @@
+//RETRIEVE HTML ELEMENTS AND SET GLOBAL VAR
 const CAUTION = document.getElementById('caution');
 const AGGRESSIVE = document.getElementById('aggressive');
 const CLUELESS = document.getElementById('clueless');
 const PLAYER = document.getElementById('you');
+
+const PLAYERLIVES = document.getElementById('yourLives');
+const AGGRELIVES = document.getElementById('aggressiveLives');
+const CAUTLIVES = document.getElementById('cautiousLives');
+const CLUELIVES = document.getElementById('cluelessLives');
 
 const DISCARD = document.getElementById('discard');
 const DECK = document.getElementById('deck');
@@ -9,24 +15,26 @@ const DECK = document.getElementById('deck');
 const POPUPCONTAINER = document.getElementById('container');
 const RESULT = document.getElementById('result');
 
-score = document.getElementById('score');
-log = document.getElementById('log-container');
+const SCORE = document.getElementById('score');
+const LOG = document.getElementById('log-container');
+
+yourLife = aggressiveLife = cautiousLife = cluelessLife = 3;
 
 cardArray = [];
 deckArray = [];
 cardsChosen = [];
 
 //LOCK SWITCHES FOR MOVES
-firstTurn = true;
-strat30 = true;
-strat31 = true;
-
+firstTurn = strat30 = strat31 = true;
 turn = 0;
-
+turnsRemaining = 3
 knocked = false;
-turnsRemaining = 3;
-
+allTie = false;
 losers = [];
+
+//GLOBAL ARRAYS FOR EASY ACCESS    
+names = ['You', 'Ms.Aggressive', 'Mr.Caution', 'Mr.Clueless'];
+lives = [yourLife, aggressiveLife, cautiousLife, cluelessLife];
 
 class Card 
 {
@@ -76,11 +84,10 @@ function initialize()
 function setBoard()
 {
     //RESET VARIABLE FOR NEW ROUND
-    firstTurn = true;
-    strat30 = true;
-    strat31 = true;
+    firstTurn = strat30 = strat31 = true;
     turn = 0;
     knocked = false;
+    allTie = false;
     turnsRemaining = 3;
 
     deckArray.sort(() => 0.5 - Math.random());
@@ -91,7 +98,6 @@ function setBoard()
     player = [];
     deck = [];
 
-    names = ['You', 'Ms.Aggressive', 'Mr.Caution', 'Mr.Clueless'];
     people = [msAggressive, mrCaution, mrClueless];
 
     //HAND OUT CARDS FROM DECK
@@ -117,8 +123,12 @@ function display(reveal = false)
     PLAYER.querySelectorAll('img').forEach(n => n.remove());
     DISCARD.querySelectorAll('img').forEach(n => n.remove());
     DECK.querySelectorAll('img').forEach(n => n.remove());
+    PLAYERLIVES.querySelectorAll('img').forEach(n => n.remove());
+    AGGRELIVES.querySelectorAll('img').forEach(n => n.remove());
+    CAUTLIVES.querySelectorAll('img').forEach(n => n.remove());
+    CLUELIVES.querySelectorAll('img').forEach(n => n.remove());
 
-    //APPEND NEW NODES
+    //APPEND NEW CARD NODES
     player.forEach(card => PLAYER.appendChild(card));
     DISCARD.appendChild(discard);
     DECK.appendChild(deck[0]);
@@ -141,7 +151,18 @@ function display(reveal = false)
         }
 
     //UPDATE SCORES
-    score.innerHTML = calculateScore(player);
+    SCORE.innerHTML = calculateScore(player);
+
+    //UPDATE LIFE
+    var allLives = [PLAYERLIVES, AGGRELIVES, CAUTLIVES, CLUELIVES];
+    for(var i = 0; i < lives.length; i++)
+        for(var j = 0; j < lives[i]; j++)
+        {
+            var img = document.createElement('img');
+            img['src'] = 'hearts.png';
+            img['classList'] = 'hearts';
+            allLives[i].appendChild(img);
+        }
 }
 
 function calculateScore(hand)
@@ -484,7 +505,7 @@ function knock()
 
 function updateLog(str, cardName = '')
 {
-    log.innerHTML += names[turn] + str + cardName + '<br><br>';
+    LOG.innerHTML += names[turn] + str + cardName + '<br><br>';
 }
 
 function showResult()
@@ -540,7 +561,10 @@ function showResult()
     //DISPLAY WHO LOST LIVES (IF EVERYONE TIED NO ONE LOSES)
     var str = '';
     if(losers.length == 4)
+    {
         str = createText('No one lost a life!');
+        allTie = true;
+    }
     else
     {
         losers.forEach(n => (str += names[n] + ' and '));
@@ -571,15 +595,11 @@ function roundOver()
 {
     POPUPCONTAINER.style.display = 'none';
     RESULT.innerHTML = '';
-    log.innerHTML = 'NEW ROUND <br>';
-    updateLife();
-    setBoard();
-}
+    LOG.innerHTML = 'NEW ROUND <br>';
+    if(!allTie)
+        losers.forEach(n => lives[n]--);
 
-function updateLife()
-{
-    console.log('vibe check')
-    console.log(losers);
+    setBoard();
 }
 
 function gameOver()
