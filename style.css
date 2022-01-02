@@ -8,6 +8,30 @@ img
   height: 180px;
   border-radius: 3px;
 }
+.hearts
+{
+  height: 35px;
+  width: 35px;
+}
+#lives
+{
+  display: grid;
+  margin-top: 50px;
+  margin-left: 100px;
+}
+#lives > div
+{
+  position: absolute;
+  margin-left: 100px;
+  color: rgb(233, 232, 232);
+}
+.life
+{
+	font: lighter 15px 'Courier New';
+	color: black;
+  margin-top: 25px;
+}
+
 
 #board
 {
