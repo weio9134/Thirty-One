@@ -19,6 +19,7 @@ const SCORE = document.getElementById('score');
 const LOG = document.getElementById('log-container');
 
 yourLife = aggressiveLife = cautiousLife = cluelessLife = 3;
+aggressiveLife = 0;
 
 cardArray = [];
 deckArray = [];
@@ -27,7 +28,7 @@ cardsChosen = [];
 //LOCK SWITCHES FOR MOVES
 firstTurn = strat30 = strat31 = true;
 turn = 0;
-turnsRemaining = 3
+turnsRemaining = 3;
 knocked = false;
 allTie = false;
 losers = [];
@@ -88,7 +89,15 @@ function setBoard()
     turn = 0;
     knocked = false;
     allTie = false;
+
     turnsRemaining = 3;
+    //SET NEW MAX TURNS LEFT AFTER SOMEONE KNOCKS
+    var num = 0;
+    lives.forEach(n => {
+        if(n <= 0)
+            turnsRemaining--;
+    });
+    console.log(turnsRemaining)
 
     deckArray.sort(() => 0.5 - Math.random());
 
@@ -98,23 +107,31 @@ function setBoard()
     player = [];
     deck = [];
 
-    people = [msAggressive, mrCaution, mrClueless];
+    ai = [msAggressive, mrCaution, mrClueless];
 
+    console.log(lives)
     //HAND OUT CARDS FROM DECK
     discard = deckArray[0];
     for(var i = 0; i < 3; i++)
     {
-        mrCaution.push(deckArray[1 + i*4]);
-        msAggressive.push(deckArray[2 + i*4]);
-        mrClueless.push(deckArray[3 + i*4]);
-        player.push(deckArray[4 + i*4]);
+        if(lives[0] > 0)
+            player.push(deckArray[1 + i*4]);
+        if(lives[1] > 0)
+            msAggressive.push(deckArray[2 + i*4]);
+        if(lives[2] > 0)
+            mrCaution.push(deckArray[3 + i*4]);
+        if(lives[3] > 0)
+            mrClueless.push(deckArray[4 + i*4]);
     }
     deck = deckArray.slice(13, deckArray.length);
-    
     display();
+
+    //IF YOU RAN OUT OF LIVES, YOU DONT GET CARDS AND DISPLAY END MSG
+    if(lives[0] == 0)
+        gameOver();
 }
 
-function display(reveal = false)
+function display(reveal = true)
 {
     //REMOVES ALL CHILD IMG NODES
     CAUTION.querySelectorAll('img').forEach(n => n.remove());
@@ -167,6 +184,9 @@ function display(reveal = false)
 
 function calculateScore(hand)
 { 
+    if(lives[0] == 0 || hand.length == 0)
+        return;
+    
     var cards = hand.map(x => cardArray[x['data-id']])
 
     //SAME SUIT RETURN SUM
@@ -259,6 +279,9 @@ function startRound()
 
 function aggresiveMove()
 {
+    if(aggressiveLife == 0)
+        return;
+
     //IF START WITH 16, KNOCK
     firstTurn = false;
     if(firstTurn && calculateScore(msAggressive) >= 16)
@@ -313,7 +336,7 @@ function goFor30(hand, personIndex)
         replaceCard = hand[2];
     else
         replaceCard = hand[0]
-    bestSwap(people[personIndex], replaceCard, 'value', pairs[0].id%13);
+    bestSwap(ai[personIndex], replaceCard, 'value', pairs[0].id%13);
 }
 
 function goFor31(hand)
@@ -443,6 +466,9 @@ function swapCards(person, card1, card2)
 
 function cautiousMove()
 {
+    if(cautiousLife == 0)
+        return;
+
     //IF HAVE GREATER THAN 27 VALUE KNOCK
     if(calculateScore(mrCaution) >= 27)
     {
@@ -466,6 +492,9 @@ function cautiousMove()
 
 function cluelessMove()
 {
+    if(cluelessLife == 0)
+        return;
+
     //IF SCORE 30 OR 31 KNOCK
     if(calculateScore(mrClueless) >= 30)
     {
@@ -527,7 +556,10 @@ function showResult()
         if(i == 0)
             scores.push(calculateScore(player));
         else
-            scores.push(calculateScore(people[i-1]));
+            scores.push(calculateScore(ai[i-1]));
+
+        if(scores[i] == undefined)
+            scores[i] = 'out of game';
 
         RESULT.appendChild(createText(scores[i]));
     }
@@ -604,7 +636,7 @@ function roundOver()
 
 function gameOver()
 {
-    return false;
+    console.log('ded')
 }
 
 function endScreen()
