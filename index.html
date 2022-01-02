@@ -16,7 +16,8 @@
       </div> 
 
       <div id = 'miscellaneous'>
-        <button id = 'callKnock' onclick = 'knock()'> Knock </button>
+        <button id = 'callKnock' class = 'gameButton' onclick = 'knock()'> Knock </button>
+        <button id = 'reset' class = 'gameButton' onclick = 'window.location.reload()'> Reset </button>
       </div>
 
       <div id = 'aggressive' class = 'player'> 
@@ -37,11 +38,11 @@
         <a href = 'rule.html' class = 'go' style = 'margin-top: 100px'> Rules </a>
       </div>
 
-      <div id = 'player' class = 'player'> 
+      <div id = 'you' class = 'player'> 
         <div class = 'name'> Your hand's value: <span id = 'score'></span> </div>
       </div>
 
-      <div id = 'log' style = 'justify-self: center;'>
+      <div id = 'log' class = 'player'>
         <div class = 'name'> Moves Log </div>
         <div id = 'log-container'></div>
       </div>

@@ -1,7 +1,7 @@
 const CAUTION = document.getElementById('caution');
 const AGGRESSIVE = document.getElementById('aggressive');
 const CLUELESS = document.getElementById('clueless');
-const PLAYER = document.getElementById('player');
+const PLAYER = document.getElementById('you');
 
 const DISCARD = document.getElementById('discard');
 const DECK = document.getElementById('deck');
@@ -25,6 +25,8 @@ turn = 0;
 
 knocked = false;
 turnsRemaining = 3;
+
+losers = [];
 
 class Card 
 {
@@ -475,8 +477,8 @@ function knock()
     updateLog(' just knocked!');
     if(turn == 0)
     {
-        turnsRemaining--;
         startRound();
+        showResult();
     }
 }
 
@@ -511,6 +513,7 @@ function showResult()
 
     //APPEND LOSER
     var smallest = scores[0];
+    losers[0] = 0;
     var index = 0;
     var tie = false;
     for(var i = 1; i < scores.length; i++)
@@ -518,12 +521,14 @@ function showResult()
         if(smallest == scores[i])
         {
             tie = true;
+            losers.push(i)
             continue;
         }
         if(smallest > scores[i])
         {
             smallest = scores[i];
             index = i;
+            losers[0] = i;
         }
     }
     RESULT.appendChild(createText('Loser:', 'header'));
@@ -531,6 +536,21 @@ function showResult()
         RESULT.appendChild(createText('TIE'));
     else
         RESULT.appendChild(createText(names[index]));
+    
+    //DISPLAY WHO LOST LIVES (IF EVERYONE TIED NO ONE LOSES)
+    var str = '';
+    if(losers.length == 4)
+        str = createText('No one lost a life!');
+    else
+    {
+        losers.forEach(n => (str += names[n] + ' and '));
+        str = createText(str.substring(0, str.length - 4) + 'lost a life');
+    }
+
+    str.style.gridColumn = 'span 2';
+    str.style.fontSize = '25 px';
+    str.style.textAlign = 'center';
+    RESULT.appendChild(str);
 }
 
 function createText(str, type = '')
@@ -559,6 +579,7 @@ function roundOver()
 function updateLife()
 {
     console.log('vibe check')
+    console.log(losers);
 }
 
 function gameOver()
