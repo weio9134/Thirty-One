@@ -58,11 +58,22 @@
     </div>
 
     <!-- RESULT POPUP BOXS -->
-    <div id = 'container'>
+    <div class = 'container' id = 'container1'>
       <div id = 'box'>
-        <div id = 'closeButton' onclick = 'roundOver()'>&times;</div>
+        <div id = 'closeButton' onclick = 'nextRound()'>&times;</div>
         <div id = 'result'></div>
       </div>
+    </div>
+
+    <!-- DEATH SCREEN POPUP BOX -->
+    <div class = 'container' id = 'container2' >
+      <div class = 'playAgain gameButton' onclick = 'window.location.reload()'> Play Again? </div>
+    </div>
+
+    <!-- WIN SCREEN -->
+    <div class = 'container' id = 'container3'>
+      <div class = 'name' id = 'winMSG'> YOU WIN! </div>
+      <div class = 'playAgain gameButton' onclick = 'window.location.reload()'> Play Again? </div>
     </div>
 
     <script src="script.js"></script>
