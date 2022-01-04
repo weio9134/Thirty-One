@@ -21,8 +21,6 @@ const SCORE = document.getElementById('score');
 const LOG = document.getElementById('log-container');
 
 yourLife = aggressiveLife = cautiousLife = cluelessLife = 3;
-aggressiveLife = cluelessLife = 0;
-yourLife = cautiousLife = 1;
 
 cardArray = [];
 deckArray = [];
