@@ -12,25 +12,28 @@ const CLUELIVES = document.getElementById('cluelessLives');
 const DISCARD = document.getElementById('discard');
 const DECK = document.getElementById('deck');
 
-const POPUPCONTAINER = document.getElementById('container');
+const POPUPCONTAINER = document.getElementById('container1');
+const LOSESCREEN = document.getElementById('container2');
+const WINSCREEN = document.getElementById('container3');
 const RESULT = document.getElementById('result');
 
 const SCORE = document.getElementById('score');
 const LOG = document.getElementById('log-container');
 
 yourLife = aggressiveLife = cautiousLife = cluelessLife = 3;
-aggressiveLife = 0;
+aggressiveLife = cluelessLife = 0;
+yourLife = cautiousLife = 1;
 
 cardArray = [];
 deckArray = [];
 cardsChosen = [];
+scores = [];
 
 //LOCK SWITCHES FOR MOVES
 firstTurn = strat30 = strat31 = true;
 turn = 0;
 turnsRemaining = 3;
 knocked = false;
-allTie = false;
 losers = [];
 
 //GLOBAL ARRAYS FOR EASY ACCESS    
@@ -84,11 +87,13 @@ function initialize()
 
 function setBoard()
 {
+    if(lives[0] == 0)
+        LOSESCREEN.style.display = 'grid';
+    
     //RESET VARIABLE FOR NEW ROUND
     firstTurn = strat30 = strat31 = true;
     turn = 0;
     knocked = false;
-    allTie = false;
 
     turnsRemaining = 3;
     //SET NEW MAX TURNS LEFT AFTER SOMEONE KNOCKS
@@ -97,7 +102,6 @@ function setBoard()
         if(n <= 0)
             turnsRemaining--;
     });
-    console.log(turnsRemaining)
 
     deckArray.sort(() => 0.5 - Math.random());
 
@@ -106,10 +110,10 @@ function setBoard()
     mrClueless = [];
     player = [];
     deck = [];
+    scores = [];
 
     ai = [msAggressive, mrCaution, mrClueless];
 
-    console.log(lives)
     //HAND OUT CARDS FROM DECK
     discard = deckArray[0];
     for(var i = 0; i < 3; i++)
@@ -125,13 +129,9 @@ function setBoard()
     }
     deck = deckArray.slice(13, deckArray.length);
     display();
-
-    //IF YOU RAN OUT OF LIVES, YOU DONT GET CARDS AND DISPLAY END MSG
-    if(lives[0] == 0)
-        gameOver();
 }
 
-function display(reveal = true)
+function display(reveal = false)
 {
     //REMOVES ALL CHILD IMG NODES
     CAUTION.querySelectorAll('img').forEach(n => n.remove());
@@ -170,7 +170,7 @@ function display(reveal = true)
     //UPDATE SCORES
     SCORE.innerHTML = calculateScore(player);
 
-    //UPDATE LIFE
+    //UPDATE LIFE DISPLAY
     var allLives = [PLAYERLIVES, AGGRELIVES, CAUTLIVES, CLUELIVES];
     for(var i = 0; i < lives.length; i++)
         for(var j = 0; j < lives[i]; j++)
@@ -542,8 +542,6 @@ function showResult()
     display(true);
     POPUPCONTAINER.style.display = 'grid';
 
-    var scores = [];
-
     //APPEND HEADER
     RESULT.appendChild(createText('Players', 'header'));
     RESULT.appendChild(createText('Scores', 'header'));
@@ -585,6 +583,7 @@ function showResult()
         }
     }
     RESULT.appendChild(createText('Loser:', 'header'));
+
     if(tie)
         RESULT.appendChild(createText('TIE'));
     else
@@ -592,11 +591,8 @@ function showResult()
     
     //DISPLAY WHO LOST LIVES (IF EVERYONE TIED NO ONE LOSES)
     var str = '';
-    if(losers.length == 4)
-    {
+    if(tie)
         str = createText('No one lost a life!');
-        allTie = true;
-    }
     else
     {
         losers.forEach(n => (str += names[n] + ' and '));
@@ -623,23 +619,27 @@ function createText(str, type = '')
     return x;
 }
 
-function roundOver()
+function nextRound()
 {
     POPUPCONTAINER.style.display = 'none';
     RESULT.innerHTML = '';
-    LOG.innerHTML = 'NEW ROUND <br>';
-    if(!allTie)
+    LOG.innerHTML = 'NEW ROUND <br><br>';
+
+    //UPDATE LIFE COUNTER
+    //IF TWO PLAYERS REMAIN & TIE, ALL PLAYERS GET ONE LIFE BACK
+    var counts = {};
+    scores.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+    if(counts['out of game'] == 2 && Object.keys(counts).length == 2)
+        for(var i = 0; i < lives.length; i++)
+            lives[i]++;
+    else
         losers.forEach(n => lives[n]--);
 
+    //IF YOU WIN THEN CUE END SCREEN
+    counts = {};
+    lives.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+    if(lives[0] > 0 && counts[0] == 3)
+        WINSCREEN.style.display = 'grid';
+
     setBoard();
-}
-
-function gameOver()
-{
-    console.log('ded')
-}
-
-function endScreen()
-{
-    console.log('ded')
 }
