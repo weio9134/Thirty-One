@@ -20,8 +20,6 @@ const RESULT = document.getElementById('result');
 const SCORE = document.getElementById('score');
 const LOG = document.getElementById('log-container');
 
-yourLife = aggressiveLife = cautiousLife = cluelessLife = 3;
-
 cardArray = [];
 deckArray = [];
 cardsChosen = [];
@@ -35,8 +33,8 @@ knocked = false;
 losers = [];
 
 //GLOBAL ARRAYS FOR EASY ACCESS    
-names = ['You', 'Ms.Aggressive', 'Mr.Caution', 'Mr.Clueless'];
-lives = [yourLife, aggressiveLife, cautiousLife, cluelessLife];
+names = ['You', 'Ms.Aggressive', 'Mr.Cautious', 'Mr.Clueless'];
+lives = [3, 3, 3, 3];
 
 class Card 
 {
@@ -237,10 +235,9 @@ function switchYourCard()
         }
 
         updateLog(' just swapped for ', getName(cardsChosen[0]));
-
+        display();
         cardsChosen = [];
         yourTurn = false;
-        display();
         startRound();
     }
 }
@@ -277,7 +274,7 @@ function startRound()
 
 function aggresiveMove()
 {
-    if(aggressiveLife == 0)
+    if(lives[1] == 0)
         return;
 
     //IF START WITH 16, KNOCK
@@ -304,10 +301,11 @@ function aggresiveMove()
         goFor31(cards);
     }
     else if(calculateScore(msAggressive) >= 20)
-    {
-        knock();
-        return;
-    }
+        if(!knocked)
+        {
+            knock();
+            return;
+        }
     else if(strat30 && hasPair(cards))
     {
         strat31 = false;
@@ -464,15 +462,16 @@ function swapCards(person, card1, card2)
 
 function cautiousMove()
 {
-    if(cautiousLife == 0)
+    if(lives[2] == 0)
         return;
 
     //IF HAVE GREATER THAN 27 VALUE KNOCK
     if(calculateScore(mrCaution) >= 27)
-    {
-        knock();
-        return;
-    }
+        if(!knocked)
+        {
+            knock();
+            return;
+        }
 
     //TURNS TO CARD OBJECT THEN SORT BY FACE VALUE
     var cards = mrCaution.map(x => cardArray[x['data-id']]);
@@ -490,15 +489,16 @@ function cautiousMove()
 
 function cluelessMove()
 {
-    if(cluelessLife == 0)
+    if(lives[3] == 0)
         return;
 
     //IF SCORE 30 OR 31 KNOCK
     if(calculateScore(mrClueless) >= 30)
-    {
-        knock();
-        return;
-    }
+        if(!knocked)
+        {
+            knock();
+            return;
+        }
 
     //RANDOMLY PICK CARDS TO SWAP
     var pickedCard;
@@ -544,7 +544,7 @@ function showResult()
     RESULT.appendChild(createText('Players', 'header'));
     RESULT.appendChild(createText('Scores', 'header'));
 
-    //APPEND PLAYER SCORES
+    //GET PLAYER SCORES
     for(var i = 0; i < 4; i++)
     {
         RESULT.appendChild(createText(names[i]));
@@ -561,41 +561,66 @@ function showResult()
     }
 
     //APPEND LOSER
-    var smallest = scores[0];
-    losers[0] = 0;
-    var index = 0;
+    loser = [];
     var tie = false;
-    for(var i = 1; i < scores.length; i++)
-    {
-        if(smallest == scores[i])
-        {
-            tie = true;
-            losers.push(i)
-            continue;
-        }
-        if(smallest > scores[i])
-        {
-            smallest = scores[i];
-            index = i;
-            losers[0] = i;
-        }
-    }
-    RESULT.appendChild(createText('Loser:', 'header'));
+    var counts = {};
 
+    //MAPS SCORES ONTO OBJECT
+    scores.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+    var smallest = Object.keys(counts)[0];
+
+    console.log('scores')
+    console.log(scores)
+    console.log('counts')
+    console.log(counts)
+    console.log('smallest: ' + smallest)
+
+    //CHECK COUNTS IN EACH 'SCORE' KEY IN OBJECT
+    //IF SOMEONE HAS 31 EVERYONE ELSE LOSES
+    if('31' in counts)
+    {
+        for(var i = 0; i < scores.length; i++)
+            if(scores[i] == undefined)
+                continue;
+            else if(scores[i] != 31)
+                losers.push(i);
+    }
+    else if(counts[smallest] > 1) 
+    {
+        console.log('\n- TIE -')
+        tie = true;
+        for(var i = 0; i < scores.length; i++)
+            if(scores[i] == undefined)
+                continue;
+            else if(scores[i] == smallest)
+            {
+                console.log('score at index: ' + scores[i])
+                console.log('score = smallest? ' + smallest)
+                console.log(scores[i] == smallest)
+                losers.push(i);
+            }
+    }
+    else
+        losers[0] = scores.indexOf(parseInt(Object.keys(counts)[0]));
+    
+    //REMOVE ANY REPEATS IF THAT HAPPENS
+    losers = [...new Set(losers)];
+
+    console.log('losers')
+    console.log(losers)
+    console.log('\n\n')
+
+    //APPPEND LOSERS
+    RESULT.appendChild(createText('Loser:', 'header'));
     if(tie)
         RESULT.appendChild(createText('TIE'));
     else
-        RESULT.appendChild(createText(names[index]));
+        RESULT.appendChild(createText(names[losers[0]]));
     
-    //DISPLAY WHO LOST LIVES (IF EVERYONE TIED NO ONE LOSES)
+    //DISPLAY WHO LOST LIVES
     var str = '';
-    if(tie)
-        str = createText('No one lost a life!');
-    else
-    {
-        losers.forEach(n => (str += names[n] + ' and '));
-        str = createText(str.substring(0, str.length - 4) + 'lost a life');
-    }
+    losers.forEach(n => (str += names[n] + ' and '));
+    str = createText(str.substring(0, str.length - 4) + 'lost a life');
 
     str.style.gridColumn = 'span 2';
     str.style.fontSize = '25 px';
@@ -627,6 +652,7 @@ function nextRound()
     //IF TWO PLAYERS REMAIN & TIE, ALL PLAYERS GET ONE LIFE BACK
     var counts = {};
     scores.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+
     if(counts['out of game'] == 2 && Object.keys(counts).length == 2)
         for(var i = 0; i < lives.length; i++)
             lives[i]++;
