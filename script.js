@@ -561,19 +561,13 @@ function showResult()
     }
 
     //APPEND LOSER
-    loser = [];
+    losers = [];
     var tie = false;
     var counts = {};
 
-    //MAPS SCORES ONTO OBJECT
+    //MAPS SCORES ONTO COUNTS
     scores.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
     var smallest = Object.keys(counts)[0];
-
-    console.log('scores')
-    console.log(scores)
-    console.log('counts')
-    console.log(counts)
-    console.log('smallest: ' + smallest)
 
     //CHECK COUNTS IN EACH 'SCORE' KEY IN OBJECT
     //IF SOMEONE HAS 31 EVERYONE ELSE LOSES
@@ -583,32 +577,22 @@ function showResult()
             if(scores[i] == undefined)
                 continue;
             else if(scores[i] != 31)
-                losers.push(i);
+            losers.push(i);
     }
     else if(counts[smallest] > 1) 
     {
-        console.log('\n- TIE -')
         tie = true;
         for(var i = 0; i < scores.length; i++)
             if(scores[i] == undefined)
                 continue;
             else if(scores[i] == smallest)
-            {
-                console.log('score at index: ' + scores[i])
-                console.log('score = smallest? ' + smallest)
-                console.log(scores[i] == smallest)
                 losers.push(i);
-            }
     }
-    else
+    else if(counts[smallest] == 1)
         losers[0] = scores.indexOf(parseInt(Object.keys(counts)[0]));
     
     //REMOVE ANY REPEATS IF THAT HAPPENS
-    losers = [...new Set(losers)];
-
-    console.log('losers')
-    console.log(losers)
-    console.log('\n\n')
+    // losers = [...new Set(losers)];
 
     //APPPEND LOSERS
     RESULT.appendChild(createText('Loser:', 'header'));
